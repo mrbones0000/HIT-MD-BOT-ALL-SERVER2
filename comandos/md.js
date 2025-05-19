@@ -11,29 +11,33 @@ module.exports = {
         .setRequired(true)
     ),
   async execute(interaction) {
-    const mensaje = interaction.options.getString('mensaje');
-    const members = await interaction.guild.members.fetch();
-
-    let enviados = 0;
-    let fallidos = 0;
-
-    await interaction.reply({ content: '📨 Enviando mensajes...', ephemeral: true });
-
-    for (const member of members.values()) {
-      if (member.user.bot) continue;
-
-      try {
-        await member.send(mensaje);
-        enviados++;
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } catch (err) {
-        fallidos++;
-      }
-    }
-
-    await interaction.followUp({
-      content: `✅ Mensaje enviado a ${enviados} usuarios.\n❌ Falló en ${fallidos} usuarios.`,
-      ephemeral: true
-    });
+  // Verificar permisos de administrador
+  if (!interaction.member.permissions.has('Administrator')) {
+    return interaction.reply({ content: '❌ No tienes permisos de administrador para usar este comando.', ephemeral: true });
   }
-};
+
+  const mensaje = interaction.options.getString('mensaje');
+  const members = await interaction.guild.members.fetch();
+
+  let enviados = 0;
+  let fallidos = 0;
+
+  await interaction.reply({ content: '📨 Enviando mensajes...', ephemeral: true });
+
+  for (const member of members.values()) {
+    if (member.user.bot) continue;
+
+    try {
+      await member.send(mensaje);
+      enviados++;
+      await new Promise(resolve => setTimeout(resolve, 1000)); // espera 1s para evitar límites
+    } catch (err) {
+      fallidos++;
+    }
+  }
+
+  await interaction.followUp({
+    content: `✅ Mensaje enviado a ${enviados} usuarios.\n❌ Falló en ${fallidos} usuarios.`,
+    ephemeral: true
+  });
+  }
