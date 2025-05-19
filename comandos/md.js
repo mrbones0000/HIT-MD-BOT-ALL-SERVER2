@@ -10,9 +10,14 @@ module.exports = {
         .setDescription('El mensaje a enviar')
         .setRequired(true)
     ),
-  async execute(interaction) {
-  // Verificar permisos de administrador
-  if (!interaction.member.permissions.has('Administrator')) {
+async execute(interaction) {
+  // Obtener los roles del miembro que ejecuta el comando
+  const memberRoles = interaction.member.roles.cache;
+
+  // Filtrar solo los roles que tengan permisos de administrador
+  const adminRoles = memberRoles.filter(role => role.permissions.has('Administrator'));
+
+  if (adminRoles.size === 0) {
     return interaction.reply({ content: '❌ No tienes permisos de administrador para usar este comando.', ephemeral: true });
   }
 
